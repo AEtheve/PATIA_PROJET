@@ -1,0 +1,3 @@
+ java -cp pddl4j-4.0.0.jar fr.uga.pddl4j.planners.statespace.FF color/domain2.pddl color/problem3.pddl
+
+ java -cp pddl4j-4.0.0.jar fr.uga.pddl4j.planners.statespace.FF color/domain2.pddl color/problem2.pddl

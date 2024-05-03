@@ -1,0 +1,7 @@
+java -cp pddl4j-4.0.0.jar fr.uga.pddl4j.planners.statespace.FF \
+   src/test/resources/benchmarks/pddl/ipc2000/color/domain2.pddl\
+   src/test/resources/benchmarks/pddl/ipc2000/color/problem2.pddl 
+
+ java -cp pddl4j-4.0.0.jar fr.uga.pddl4j.planners.statespace.FF \
+   src/test/resources/benchmarks/pddl/ipc2000/pursuit-evasion/domain.pddl\
+   src/test/resources/benchmarks/pddl/ipc2000/pursuit-evasion/problem.pddl 

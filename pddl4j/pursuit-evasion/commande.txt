@@ -1,0 +1,5 @@
+java -cp pddl4j-4.0.0.jar fr.uga.pddl4j.planners.statespace.FF \
+   src/test/resources/benchmarks/pddl/ipc2000/exos/pursuit-evasion/domain2.pddl\
+   src/test/resources/benchmarks/pddl/ipc2000/exos/pursuit-evasion/problem2.pddl 
+
+   

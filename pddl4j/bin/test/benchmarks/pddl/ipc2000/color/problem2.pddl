@@ -1,0 +1,22 @@
+(define (problem coloriage)
+(:domain coloriage)
+(:objects n1 n2 n3 - noeud
+                a1 a2 - arrete
+                c1 c2 - color)
+        (:init
+                (voisin n1 n2)
+                (voisin n2 n1)
+                (voisin n2 n3)
+                (voisin n3 n2)
+                (incolore n1)
+                (incolore n2)
+                (incolore n3)
+                (differentes_couleurs c1 c2)
+                (differentes_couleurs c2 c1)
+                (entre a1 n1 n2)
+                (entre a1 n2 n1)
+                (entre a2 n2 n3)
+                (entre a2 n3 n2)
+                )
+        (:goal (and (marquee a1)(marquee a2)))
+)
