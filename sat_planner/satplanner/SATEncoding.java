@@ -59,8 +59,13 @@ public final class SATEncoding {
     public void encode(final Problem problem, final int stepsO) {
         int steps = stepsO;
         if (steps == 0) {
+            //si on est au premier step
+            //on récupère le vecteur de prédicats de l'état initial du problème
+            // si la prédicat est vrai dans l'état initial le bit correspondant est à vrai sinon à faux
             BitVector positives = problem.getInitialState().getPositiveFluents();
             System.out.println("Initial state: " + positives);
+            //pour chaque prédicat l'ajoute à la liste des clauses si il est vrai dans l'état initial
+            // et l'ajoute à la liste des clauses avec un signe négatif si il est faux
 
             for (int i = 0; i < problem.getFluents().size(); i++) {
                 if (positives.get(i)) {
@@ -87,6 +92,10 @@ public final class SATEncoding {
 
             steps = 1;
         } else {
+            // à chaque step on veut modifier le but 
+            // afin que le solver puisse réaliser une action suplémentaire afin de satisfaire le but
+            // car la clé associée au goal dépend du nombre de steps
+            // on supprime donc les clauses du but précédent
             for (int i = 0; i < goalsIndex.size(); i++) {
                 dimacs.remove(goalsIndex.get(i));
                 System.out.println("goal to remove: " + goalsIndex.get(i));
@@ -99,22 +108,25 @@ public final class SATEncoding {
 
         // actions:
         List<Action> actions = problem.getActions();
+        // pour chacune des actions on récupère les préconditions nécéssaires à la réalisation de cette action et les effets de cette dernière
         for (int i = 0; i < actions.size(); i++) {
             Action a = actions.get(i);
 
-            BitVector pre = a.getPrecondition().getPositiveFluents();
-            BitVector pos = a.getUnconditionalEffect().getPositiveFluents();
-            BitVector neg = a.getUnconditionalEffect().getNegativeFluents();
+            BitVector pre = a.getPrecondition().getPositiveFluents(); //liste des prédicats qui sont à vrai si nécessaire pour réaliser l'action 
+            BitVector pos = a.getUnconditionalEffect().getPositiveFluents(); //liste des prédicats qui sont à vrai si vrai après réalisation de l'action 
+            BitVector neg = a.getUnconditionalEffect().getNegativeFluents(); //liste des prédicats qui sont à vrai si faux après réalisation de l'action 
 
             for (int j = 0; j < pos.size(); j++) {
                 if (pre.get(j)) {
                     final List<Integer> clause = new ArrayList<>();
-
+                    
+                    //si l'action et sa clée correspondante à la nouvelle étape n'existe pas on l'ajoute à la liste des actions
                     if (!actionsMap.containsKey(pair(i + 1, steps))) {
                         actionsMap.put(pair(i + 1, steps), ident);
                         ident++;
-                    }
-
+                    } 
+                    // on ajoute une clause pour chaque prédicat qui doit être vrai pour pouvoir réaliser l'action
+                    // qui dit que ou le prédicat est vrai ou l'action n'est pas réalisable
                     clause.add(-actionsMap.get(pair(i + 1, steps)));
                     clause.add(predicatsMap.get(pair(j + 1, steps)));
                     dimacs.add(clause);
@@ -131,7 +143,9 @@ public final class SATEncoding {
                     }
 
                     clause.add(-actionsMap.get(pair(i + 1, steps)));
-
+                    //on ajoute une clause pour chaque prédicat qui est vrai après réalisation de l'action 
+                    // qui dit que l'action n'est pas réalisée ou le prédicat ne sera pas vrai donc que si l'action est réalisée le prédicat sera vrai
+                
                     if (!predicatsMap.containsKey(pair(j + 1, steps + 1))) {
                         predicatsMap.put(pair(j + 1, steps + 1), ident);
                         ident++;
@@ -151,7 +165,8 @@ public final class SATEncoding {
                     }
 
                     clause.add(-actionsMap.get(pair(i + 1, steps)));
-
+                    //on ajoute une clause pour chaque prédicat qui est faux après réalisation de l'action
+                    // qui dit que l'action n'est pas réalisée ou le prédicat ne sera pas faux à l'étape suivante
                     if (!predicatsMap.containsKey(pair(j + 1, steps + 1))) {
                         predicatsMap.put(pair(j + 1, steps + 1), ident);
                         ident++;
@@ -170,25 +185,37 @@ public final class SATEncoding {
         }
 
         // exclusion axiom:
+        // on ajoute des clauses qui disent que deux actions différentes ne peuvent pas être réalisées en même temps
         for (int i = 0; i < problem.getActions().size(); i++) {
             for (int j = 0; j < problem.getActions().size(); j++) {
                 if (i != j) {
                     final List<Integer> clause = new ArrayList<>();
+                    if (!actionsMap.containsKey(pair(i + 1, steps))) {
+                        actionsMap.put(pair(i + 1, steps), ident);
+                        ident++;
+                    }
                     clause.add(-actionsMap.get(pair(i + 1, steps)));
+                    if (!actionsMap.containsKey(pair(j + 1, steps))) {
+                        actionsMap.put(pair(j + 1, steps), ident);
+                        ident++;
+                    }
                     clause.add(-actionsMap.get(pair(j + 1, steps)));
+                    
                     dimacs.add(clause);
                     System.out.println("exclusion: " + clause);
                 }
             }
         }
 
-        // System.out.println("\nDIMACS_EXCL: " + dimacs.size());
+        
 
         // Action effects:
         for (int i = 0; i < problem.getFluents().size(); i++) {
             ArrayList<Integer> getPosEffects = new ArrayList<>();
             ArrayList<Integer> getNegEffects = new ArrayList<>();
 
+
+            // pour chaque prédicat on récupère les actions qui ont un effet positif ou négatif sur ce prédicat
             for (int j = 0; j < problem.getActions().size(); j++) {
                 Action a = problem.getActions().get(j);
                 BitVector pos = a.getUnconditionalEffect().getPositiveFluents();
@@ -204,9 +231,10 @@ public final class SATEncoding {
             }
 
             if (getPosEffects.size() > 0) {
-
+                // pour chaque prédicat on ajoute une clause qui dit que soit le prédicat est faux à l'étape suivante 
+                // soit une des actions qui a un effet positif sur ce prédicat est réalisée
+                // soit le prédicat est déjà vrai 
                 final List<Integer> clause = new ArrayList<>();
-
                 clause.add(-predicatsMap.get(pair(i + 1, steps + 1)));
                 clause.add(predicatsMap.get(pair(i + 1, steps)));
 
@@ -221,6 +249,9 @@ public final class SATEncoding {
 
             if (getNegEffects.size() > 0) {
                 final List<Integer> clause = new ArrayList<>();
+                // pour chaque prédicat on ajoute une clause qui dit que soit le prédicat sera vrai à l'étape suivante 
+                // soit une des actions qui a un effet négatif sur ce prédicat est réalisée
+                // soit le prédicat est faut à l'étape courante  
 
                 clause.add(predicatsMap.get(pair(i + 1, steps + 1)));
                 clause.add(-predicatsMap.get(pair(i + 1, steps)));
@@ -243,7 +274,7 @@ public final class SATEncoding {
         System.out.println("Goals: " + goalsPos);
 
         
-
+        // pour chaque prédicat qui est à vrai dans le but on ajoute une clause à la liste des clauses
         for (int i = 0; i < problem.getFluents().size(); i++) {
             if (goalsPos.get(i)) {
                 final List<Integer> clause = new ArrayList<>();
@@ -263,7 +294,8 @@ public final class SATEncoding {
     public Plan solve() {
         try {
             ISolver solver = SolverFactory.newDefault();
-
+            // pour chaque clause de la liste des clauses transforme la liste en tableau d'entiers
+            // et ajoute la clause au solver
             for (List<Integer> clause : dimacs) {
                 int[] clauseArray = new int[clause.size()];
                 for (int i = 0; i < clause.size(); i++) {
@@ -273,7 +305,7 @@ public final class SATEncoding {
                 System.out.println("add clause: " + clause);
             }
 
-        
+            // si le solver trouve une solution on récupère le plan
             if (solver.isSatisfiable()) {
                 System.out.println("Satisfiable en " + (steps+1) + " steps !");
 
