@@ -1,0 +1,14 @@
+Pour compiler et exécuter le sat_solver, il faut se placer dans le dossier satplanner et exécuter les commandes suivantes :
+
+javac -d classes -cp classes:lib/pddl4j-4.0.0.jar:lib/sat4j-sat.jar:lib/org.sat4j.core.jar satplanner/*.java -Xlint:unchecked
+
+java -cp classes:lib/pddl4j-4.0.0.jar:lib/sat4j-sat.jar satplanner.SATP [nomdomaine] [nomprobleme]
+
+lancer script pour comparer nos resultats avec ceux de ASP: sh test.sh puis python3 compare.py
+
+Pour compiler et exécuter le sokoban, il faut se placer dans le dossier sokoban et exécuter les commandes suivantes :
+java --add-opens java.base/java.lang=ALL-UNNAMED \
+      -server -Xms2048m -Xmx2048m \
+      -cp "$(mvn dependency:build-classpath -Dmdep.outputFile=/dev/stdout -q):target/test-classes/:target/classes" \
+      sokoban.SokobanMain [test]
+il y a 31 tests possibles : test0 ... test30
