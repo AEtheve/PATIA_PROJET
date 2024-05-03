@@ -1,0 +1,13 @@
+compilation: 
+javac -d classes -cp lib/pddl4j-4.0.0.jar asp/ASP.java
+javac -d classes -cp lib/pddl4j-4.0.0.jar satplanner/SATP.java 
+
+
+
+execution:
+java -cp classes:lib/pddl4j-4.0.0.jar fr.uga.pddl4j.examples.asp.ASP 
+resources/benchmarks/pddl/ipc2002/depots/strips-automatic/domain.pddl 
+resources/benchmarks/pddl/ipc2002/depots/strips-automatic/p01.pddl 
+-e FAST_FORWARD -w 1.2 -t 1000
+
+java -cp classes:lib/pddl4j-4.0.0.jar SATP resources/benchmarks/pddl/ipc2002/depots/strips-automatic/domain.pddl resources/benchmarks/pddl/ipc2002/depots/strips-automatic/p01.pddl
