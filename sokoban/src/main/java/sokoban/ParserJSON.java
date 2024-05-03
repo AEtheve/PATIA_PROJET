@@ -1,37 +1,5 @@
 package sokoban;
 
-//exemple à écrire dans un fichier à partir d'un json
-// (define (problem pbSOKO) (:domain sokoban)
-
-// (:objects
-//     p - player
-//     b - bloc
-//     c1 c2 c3 c4 - case
-// )
-
-
-// (:init
-// (player-on p c4)
-// (bloc-on b c2)
-// (libre c1)
-// (libre c3)
-// (libre c4)
-// (voisin-haut c1 c2)
-// (voisin-bas c2 c1)
-// (voisin-haut c2 c3)
-// (voisin-bas c3 c2)
-// (voisin-haut c3 c4)
-// (voisin-bas c4 c3)
-// (goal c1)
-
-// )
-
-
-// (:goal (and
-//     (goal-ok c1)
-// ))
-// )
-
 import java.lang.reflect.Array;
 import java.util.HashMap;
 
@@ -49,9 +17,6 @@ class ParserJSON {
             // on récupère les cases
             String testIn = (String) jsonObject.get("testIn");
             String[] lines = testIn.split("\n");
-            // int[][] cases = new int[lines.length][lines[0].length()];
-            // String[][] casesLibres = new String[lines.length][lines[0].length()];
-            // get max length of lines
             int maxLength = 0;
             for (int i = 0; i < lines.length; i++) {
                 if (lines[i].length() > maxLength) {
@@ -67,7 +32,7 @@ class ParserJSON {
                 }
             }
 
-            //tableau d'indice cases libres -1 si c'est un mur
+            // rempli le tableau en numérotant les cases qui ne sont pas des murs
             int k=1;
             for (int i = 0; i < lines.length; i++) {
                 for (int j = 0; j < lines[i].length(); j++) {
@@ -115,8 +80,6 @@ class ParserJSON {
                             voisins_gauche.put(key, value);
                         }
                         if (j < lines[i].length() - 1 && cases[i][j + 1] != '#') {
-                            //int[] voisin = { i, j - 1 };
-                            //voisin_droite.add(voisin);
                             // i,j+1  voisin droite de i,jcase
                             String value = casesLibres[i][j];
                             String key = casesLibres[i][j + 1];
@@ -126,7 +89,6 @@ class ParserJSON {
                     }
                     if (cases[i][j] == '$') {
                         String value = casesLibres[i][j];
-                        // bloc_on.add(nbB,value);
                         bloc_on.put(nbB,value);
                         nbB++;
                     }
