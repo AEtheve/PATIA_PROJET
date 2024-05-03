@@ -12,9 +12,10 @@ loader() {
         printf "\r${spin:$i:1} $time $message"
         sleep .1
         time=$((time+1))
-        if [ $time -eq 300 ]; then
+        if [ $time -eq 3000 ]; then
             printf "\r\033[31mx\033[0m $message\n"
             kill $pid
+            return 1
         fi
     done
     if [ $? -eq 0 ]; then
@@ -34,8 +35,8 @@ javac -d classes -cp classes:lib/pddl4j-4.0.0.jar:lib/sat4j-sat.jar:lib/org.sat4
 loader $! "Compiling SAT Planner"
 
 
-echo "== SAT Planner V.S ASP on blocksword =="
-path="test/resources/benchmarks/pddl/ipc2000/blocks/strips-typed"
+echo "== SAT Planner V.S ASP on gripper =="
+path="test/resources/benchmarks/pddl/ipc2002/gripper/strips"
 
 # file=test/resources/benchmarks/pddl/ipc2000/blocks/strips-typed/p009.pddl
 for file in $path/p*.pddl; do
